@@ -3,7 +3,7 @@
  * Plugin Name: FRCF Course Manager
  * Plugin URI: https://yourdomain.com/
  * Description: Modul pentru afișarea cursurilor cu filtrare după locație și expirare automată
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Your Name
  * License: GPL v2 or later
  * Text Domain: frcf-courses
@@ -12,7 +12,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 // Constante
-define('FRCF_COURSES_VERSION', '1.0.1');
+define('FRCF_COURSES_VERSION', '1.1.0');
 define('FRCF_COURSES_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FRCF_COURSES_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FRCF_COURSES_TABLE', $GLOBALS['wpdb']->prefix . 'frcf_courses');
@@ -32,7 +32,7 @@ function frcf_courses_activate() {
         location varchar(255) NOT NULL,
         start_date date NOT NULL,
         end_date date,
-        organizer varchar(255),
+        organizer text,
         category varchar(255),
         description longtext,
         created_at datetime DEFAULT CURRENT_TIMESTAMP,
@@ -64,6 +64,11 @@ function frcf_courses_maybe_upgrade() {
     $column = $wpdb->get_results( $wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s", 'category') );
     if ( empty( $column ) ) {
         $wpdb->query("ALTER TABLE $table ADD category varchar(255) AFTER organizer, ADD KEY category (category)");
+    }
+
+    $organizer_col = $wpdb->get_row("SHOW COLUMNS FROM $table LIKE 'organizer'");
+    if ( $organizer_col && stripos( $organizer_col->Type, 'text' ) === false ) {
+        $wpdb->query("ALTER TABLE $table MODIFY organizer text");
     }
 }
 

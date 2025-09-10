@@ -105,7 +105,7 @@ function frcf_courses_admin_page() {
                     <th><?php echo esc_html__( 'Locație', 'frcf-courses' ); ?></th>
                     <th><?php echo esc_html__( 'Data Start', 'frcf-courses' ); ?></th>
                     <th><?php echo esc_html__( 'Data Sfârșit', 'frcf-courses' ); ?></th>
-                    <th><?php echo esc_html__( 'Organizator', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Organizator(i)', 'frcf-courses' ); ?></th>
                     <th><?php echo esc_html__( 'Categorie', 'frcf-courses' ); ?></th>
                     <th><?php echo esc_html__( 'Acțiuni', 'frcf-courses' ); ?></th>
                 </tr>
@@ -155,8 +155,13 @@ function frcf_courses_add_page() {
         if ($course->location && !in_array($course->location, $existing_locations, true)) {
             $existing_locations[] = $course->location;
         }
-        if ($course->organizer && !in_array($course->organizer, $existing_organizers, true)) {
-            $existing_organizers[] = $course->organizer;
+        if ($course->organizer) {
+            $course_orgs = array_map('trim', explode(',', $course->organizer));
+            foreach ($course_orgs as $org) {
+                if ($org !== '' && !in_array($org, $existing_organizers, true)) {
+                    $existing_organizers[] = $org;
+                }
+            }
         }
         if ($course->category && !in_array($course->category, $existing_categories, true)) {
             $existing_categories[] = $course->category;
@@ -167,15 +172,25 @@ function frcf_courses_add_page() {
     sort($existing_organizers);
     sort($existing_categories);
 
+    $selected_organizers = $course ? array_map('trim', explode(',', $course->organizer)) : array();
+
     // Procesare formular
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('frcf_save_course')) {
         $location_value  = (isset($_POST['location_select']) && $_POST['location_select'] === 'new')
             ? sanitize_text_field( wp_unslash( $_POST['location_new'] ) )
             : sanitize_text_field( wp_unslash( $_POST['location_select'] ) );
 
-        $organizer_value = (isset($_POST['organizer_select']) && $_POST['organizer_select'] === 'new')
-            ? sanitize_text_field( wp_unslash( $_POST['organizer_new'] ) )
-            : sanitize_text_field( wp_unslash( $_POST['organizer_select'] ) );
+        $selected_organizers = array();
+        if ( isset( $_POST['organizers'] ) && is_array( $_POST['organizers'] ) ) {
+            $selected_organizers = array_map( 'sanitize_text_field', wp_unslash( $_POST['organizers'] ) );
+        }
+        $new_orgs = isset( $_POST['organizer_new'] ) ? sanitize_text_field( wp_unslash( $_POST['organizer_new'] ) ) : '';
+        if ( $new_orgs !== '' ) {
+            $split = array_map( 'trim', explode( ',', $new_orgs ) );
+            $selected_organizers = array_merge( $selected_organizers, $split );
+        }
+        $selected_organizers = array_filter( array_map( 'trim', $selected_organizers ) );
+        $organizer_value = implode( ', ', $selected_organizers );
 
         $category_value  = (isset($_POST['category_select']) && $_POST['category_select'] === 'new')
             ? sanitize_text_field( wp_unslash( $_POST['category_new'] ) )
@@ -211,11 +226,17 @@ function frcf_courses_add_page() {
             sort($existing_locations);
             update_option('frcf_courses_locations', $existing_locations);
         }
-        if ($organizer_value && !in_array($organizer_value, $existing_organizers, true)) {
-            $existing_organizers[] = $organizer_value;
-            sort($existing_organizers);
-            update_option('frcf_courses_organizers', $existing_organizers);
+
+        if ( ! empty( $selected_organizers ) ) {
+            foreach ( $selected_organizers as $org ) {
+                if ( $org && ! in_array( $org, $existing_organizers, true ) ) {
+                    $existing_organizers[] = $org;
+                }
+            }
+            sort( $existing_organizers );
+            update_option( 'frcf_courses_organizers', $existing_organizers );
         }
+
         if ($category_value && !in_array($category_value, $existing_categories, true)) {
             $existing_categories[] = $category_value;
             sort($existing_categories);
@@ -276,19 +297,20 @@ function frcf_courses_add_page() {
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="organizer_select"><?php echo esc_html__( 'Organizator', 'frcf-courses' ); ?></label></th>
+                    <th><label for="organizers"><?php echo esc_html__( 'Organizatori', 'frcf-courses' ); ?></label></th>
                     <td>
-                        <select name="organizer_select" id="organizer_select" onchange="toggleOrganizerInput()" style="min-width: 250px;">
-                            <option value=""><?php echo esc_html__( '-- Selectează Organizator --', 'frcf-courses' ); ?></option>
+                        <select name="organizers[]" id="organizers" multiple style="min-width: 250px; height: 120px;">
                             <?php foreach ($existing_organizers as $org): ?>
-                                <option value="<?php echo esc_attr($org); ?>" <?php selected($course && $course->organizer === $org); ?>>
+                                <option value="<?php echo esc_attr($org); ?>" <?php echo in_array($org, $selected_organizers, true) ? 'selected' : ''; ?>>
                                     <?php echo esc_html($org); ?>
                                 </option>
                             <?php endforeach; ?>
-                            <option value="new"><?php echo esc_html__( '➕ Adaugă organizator nou', 'frcf-courses' ); ?></option>
                         </select>
+                        <p class="description" style="margin-top:5px;">
+                            <?php echo esc_html__( 'Selectează unul sau mai mulți organizatori (Ctrl+Click).', 'frcf-courses' ); ?>
+                        </p>
                         <input type="text" name="organizer_new" id="organizer_new" class="regular-text"
-                               placeholder="<?php echo esc_attr__( 'Introdu organizator nou', 'frcf-courses' ); ?>" style="display: none; margin-left: 10px;">
+                               placeholder="<?php echo esc_attr__( 'Organizatori noi, separați prin virgulă', 'frcf-courses' ); ?>" style="margin-top:10px;">
                     </td>
                 </tr>
                 <tr>
@@ -355,18 +377,6 @@ function frcf_courses_add_page() {
         } else {
             input.style.display = 'none';
             input.required = false;
-            input.value = '';
-        }
-    }
-
-    function toggleOrganizerInput() {
-        var select = document.getElementById('organizer_select');
-        var input = document.getElementById('organizer_new');
-
-        if (select.value === 'new') {
-            input.style.display = 'inline-block';
-        } else {
-            input.style.display = 'none';
             input.value = '';
         }
     }
