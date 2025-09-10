@@ -36,6 +36,7 @@ Atribute disponibile:
 
 - `columns` – numărul de coloane (2–4).
 - `location` – afișează doar cursurile dintr-o anumită locație.
+- `category` / `categorie` – afișează doar cursurile dintr-o anumită categorie.
 - `limit` – numărul maxim de cursuri returnate.
 - `show_all` – `yes` pentru a afișa și cursurile expirate.
 - `debug` – `yes` afișează informații de depanare.
