@@ -75,3 +75,4 @@ function frcf_courses_maybe_upgrade() {
 
 require_once FRCF_COURSES_PLUGIN_DIR . 'admin/admin-pages.php';
 require_once FRCF_COURSES_PLUGIN_DIR . 'public/shortcode.php';
+require_once FRCF_COURSES_PLUGIN_DIR . 'public/shortcode-category.php';

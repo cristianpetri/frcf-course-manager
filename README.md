@@ -20,6 +20,8 @@ Modul WordPress pentru gestionarea și afișarea cursurilor FRCF. Permite adăug
 
 Folosește shortcode-ul `[frcf_courses]` pentru a afișa lista de cursuri.
 
+Shortcode-ul `[frcf_courses_by_category]` afișează cursurile grupate și sortate după categorie.
+
 Exemple:
 
 ```
@@ -27,6 +29,7 @@ Exemple:
 [frcf_courses columns="4"]
 [frcf_courses location="București" limit="5"]
 [frcf_courses show_all="yes"]
+[frcf_courses_by_category]
 ```
 
 Atribute disponibile:
