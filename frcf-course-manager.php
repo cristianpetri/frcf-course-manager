@@ -60,8 +60,8 @@ function frcf_courses_deactivate() {
 add_action('admin_menu', 'frcf_courses_admin_menu');
 function frcf_courses_admin_menu() {
     add_menu_page(
-        'FRCF Cursuri',
-        'FRCF Cursuri',
+        __('FRCF Cursuri', 'frcf-courses'),
+        __('FRCF Cursuri', 'frcf-courses'),
         'manage_options',
         'frcf-courses',
         'frcf_courses_admin_page',
@@ -71,8 +71,8 @@ function frcf_courses_admin_menu() {
 
     add_submenu_page(
         'frcf-courses',
-        'Toate Cursurile',
-        'Toate Cursurile',
+        __('Toate Cursurile', 'frcf-courses'),
+        __('Toate Cursurile', 'frcf-courses'),
         'manage_options',
         'frcf-courses',
         'frcf_courses_admin_page'
@@ -80,8 +80,8 @@ function frcf_courses_admin_menu() {
 
     add_submenu_page(
         'frcf-courses',
-        'Adaugă Curs Nou',
-        'Adaugă Curs Nou',
+        __('Adaugă Curs Nou', 'frcf-courses'),
+        __('Adaugă Curs Nou', 'frcf-courses'),
         'manage_options',
         'frcf-courses-add',
         'frcf_courses_add_page'
@@ -89,8 +89,8 @@ function frcf_courses_admin_menu() {
 
     add_submenu_page(
         'frcf-courses',
-        'Setări',
-        'Setări',
+        __('Setări', 'frcf-courses'),
+        __('Setări', 'frcf-courses'),
         'manage_options',
         'frcf-courses-settings',
         'frcf_courses_settings_page'
@@ -114,27 +114,27 @@ function frcf_courses_admin_page() {
     if (isset($_GET['action'], $_GET['id'], $_GET['_wpnonce']) && $_GET['action'] === 'delete') {
         if (wp_verify_nonce($_GET['_wpnonce'], 'frcf_delete_course_' . intval($_GET['id']))) {
             $wpdb->delete($table_name, array('id' => intval($_GET['id'])));
-            echo '<div class="notice notice-success"><p>Cursul a fost șters!</p></div>';
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Cursul a fost șters!', 'frcf-courses' ) . '</p></div>';
         } else {
-            echo '<div class="notice notice-error"><p>Nonce invalid. Operațiune anulată.</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__( 'Nonce invalid. Operațiune anulată.', 'frcf-courses' ) . '</p></div>';
         }
     }
 
     $courses = $wpdb->get_results("SELECT * FROM $table_name ORDER BY start_date DESC");
     ?>
     <div class="wrap">
-        <h1>FRCF Cursuri <a href="?page=frcf-courses-add" class="page-title-action">Adaugă Nou</a></h1>
+        <h1><?php echo esc_html__( 'FRCF Cursuri', 'frcf-courses' ); ?> <a href="?page=frcf-courses-add" class="page-title-action"><?php echo esc_html__( 'Adaugă Nou', 'frcf-courses' ); ?></a></h1>
 
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Titlu</th>
-                    <th>Locație</th>
-                    <th>Data Start</th>
-                    <th>Data Sfârșit</th>
-                    <th>Organizator</th>
-                    <th>Acțiuni</th>
+                    <th><?php echo esc_html__( 'ID', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Titlu', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Locație', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Data Start', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Data Sfârșit', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Organizator', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Acțiuni', 'frcf-courses' ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -147,14 +147,14 @@ function frcf_courses_admin_page() {
                     <td><?php echo $course->end_date ? esc_html(date('d.m.Y', strtotime($course->end_date))) : '-'; ?></td>
                     <td><?php echo esc_html($course->organizer); ?></td>
                     <td>
-                        <a href="<?php echo esc_url( add_query_arg(array('page'=>'frcf-courses-add','id'=>$course->id), admin_url('admin.php')) ); ?>" class="button">Editează</a>
+                        <a href="<?php echo esc_url( add_query_arg(array('page'=>'frcf-courses-add','id'=>$course->id), admin_url('admin.php')) ); ?>" class="button"><?php echo esc_html__( 'Editează', 'frcf-courses' ); ?></a>
                         <?php $nonce = wp_create_nonce('frcf_delete_course_' . $course->id); ?>
                         <a href="<?php echo esc_url( add_query_arg(array('page'=>'frcf-courses','action'=>'delete','id'=>$course->id,'_wpnonce'=>$nonce), admin_url('admin.php')) ); ?>"
-                           class="button" onclick="return confirm('Sigur dorești să ștergi acest curs?')">Șterge</a>
+                           class="button" onclick="return confirm('<?php echo esc_js( esc_html__( 'Sigur dorești să ștergi acest curs?', 'frcf-courses' ) ); ?>')"><?php echo esc_html__( 'Șterge', 'frcf-courses' ); ?></a>
                     </td>
                 </tr>
                 <?php endforeach; else: ?>
-                <tr><td colspan="7">Nu există cursuri.</td></tr>
+                <tr><td colspan="7"><?php echo esc_html__( 'Nu există cursuri.', 'frcf-courses' ); ?></td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -202,11 +202,11 @@ function frcf_courses_add_page() {
 
         if ($course) {
             $wpdb->update($table_name, $data, array('id' => $course->id));
-            echo '<div class="notice notice-success"><p>Cursul a fost actualizat!</p></div>';
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Cursul a fost actualizat!', 'frcf-courses' ) . '</p></div>';
             $course = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $course->id));
         } else {
             $wpdb->insert($table_name, $data);
-            echo '<div class="notice notice-success"><p>Cursul a fost adăugat!</p></div>';
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Cursul a fost adăugat!', 'frcf-courses' ) . '</p></div>';
         }
 
         // Reîncarcă listele
@@ -215,22 +215,22 @@ function frcf_courses_add_page() {
     }
     ?>
     <div class="wrap">
-        <h1><?php echo $course ? 'Editează Curs' : 'Adaugă Curs Nou'; ?></h1>
+        <h1><?php echo $course ? esc_html__( 'Editează Curs', 'frcf-courses' ) : esc_html__( 'Adaugă Curs Nou', 'frcf-courses' ); ?></h1>
 
         <form method="post" action="">
             <?php wp_nonce_field('frcf_save_course'); ?>
             <table class="form-table">
                 <tr>
-                    <th><label for="title">Titlu Curs</label></th>
+                    <th><label for="title"><?php echo esc_html__( 'Titlu Curs', 'frcf-courses' ); ?></label></th>
                     <td><input type="text" name="title" id="title" class="regular-text"
                                value="<?php echo $course ? esc_attr($course->title) : ''; ?>" required></td>
                 </tr>
                 <tr>
-                    <th><label for="image_url">URL Imagine</label></th>
+                    <th><label for="image_url"><?php echo esc_html__( 'URL Imagine', 'frcf-courses' ); ?></label></th>
                     <td>
                         <input type="text" name="image_url" id="image_url" class="large-text"
                                value="<?php echo $course ? esc_url($course->image_url) : ''; ?>">
-                        <button type="button" class="button" onclick="selectImage()">Selectează din Media</button>
+                        <button type="button" class="button" onclick="selectImage()"><?php echo esc_html__( 'Selectează din Media', 'frcf-courses' ); ?></button>
                         <?php if ($course && $course->image_url): ?>
                             <br><br>
                             <img src="<?php echo esc_url($course->image_url); ?>" style="max-width: 300px; height: auto;">
@@ -238,52 +238,52 @@ function frcf_courses_add_page() {
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="location_select">Locație</label></th>
+                    <th><label for="location_select"><?php echo esc_html__( 'Locație', 'frcf-courses' ); ?></label></th>
                     <td>
                         <select name="location_select" id="location_select" onchange="toggleLocationInput()" style="min-width: 250px;">
-                            <option value="">-- Selectează Locație --</option>
+                            <option value=""><?php echo esc_html__( '-- Selectează Locație --', 'frcf-courses' ); ?></option>
                             <?php foreach ($existing_locations as $loc): ?>
                                 <option value="<?php echo esc_attr($loc); ?>" <?php selected($course && $course->location === $loc); ?>>
                                     <?php echo esc_html($loc); ?>
                                 </option>
                             <?php endforeach; ?>
-                            <option value="new">➕ Adaugă locație nouă</option>
+                            <option value="new"><?php echo esc_html__( '➕ Adaugă locație nouă', 'frcf-courses' ); ?></option>
                         </select>
                         <input type="text" name="location_new" id="location_new" class="regular-text"
-                               placeholder="Introdu locație nouă" style="display: none; margin-left: 10px;">
+                               placeholder="<?php echo esc_attr__( 'Introdu locație nouă', 'frcf-courses' ); ?>" style="display: none; margin-left: 10px;">
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="start_date">Data Start</label></th>
+                    <th><label for="start_date"><?php echo esc_html__( 'Data Start', 'frcf-courses' ); ?></label></th>
                     <td><input type="date" name="start_date" id="start_date"
                                value="<?php echo $course ? esc_attr($course->start_date) : ''; ?>" required></td>
                 </tr>
                 <tr>
-                    <th><label for="end_date">Data Sfârșit</label></th>
+                    <th><label for="end_date"><?php echo esc_html__( 'Data Sfârșit', 'frcf-courses' ); ?></label></th>
                     <td>
                         <input type="date" name="end_date" id="end_date"
                                value="<?php echo $course ? esc_attr($course->end_date) : ''; ?>">
-                        <p class="description">Lasă gol dacă cursul durează o singură zi sau nu are dată de sfârșit.</p>
+                        <p class="description"><?php echo esc_html__( 'Lasă gol dacă cursul durează o singură zi sau nu are dată de sfârșit.', 'frcf-courses' ); ?></p>
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="organizer_select">Organizator</label></th>
+                    <th><label for="organizer_select"><?php echo esc_html__( 'Organizator', 'frcf-courses' ); ?></label></th>
                     <td>
                         <select name="organizer_select" id="organizer_select" onchange="toggleOrganizerInput()" style="min-width: 250px;">
-                            <option value="">-- Selectează Organizator --</option>
+                            <option value=""><?php echo esc_html__( '-- Selectează Organizator --', 'frcf-courses' ); ?></option>
                             <?php foreach ($existing_organizers as $org): ?>
                                 <option value="<?php echo esc_attr($org); ?>" <?php selected($course && $course->organizer === $org); ?>>
                                     <?php echo esc_html($org); ?>
                                 </option>
                             <?php endforeach; ?>
-                            <option value="new">➕ Adaugă organizator nou</option>
+                            <option value="new"><?php echo esc_html__( '➕ Adaugă organizator nou', 'frcf-courses' ); ?></option>
                         </select>
                         <input type="text" name="organizer_new" id="organizer_new" class="regular-text"
-                               placeholder="Introdu organizator nou" style="display: none; margin-left: 10px;">
+                               placeholder="<?php echo esc_attr__( 'Introdu organizator nou', 'frcf-courses' ); ?>" style="display: none; margin-left: 10px;">
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="description">Descriere</label></th>
+                    <th><label for="description"><?php echo esc_html__( 'Descriere', 'frcf-courses' ); ?></label></th>
                     <td>
                         <?php
                         wp_editor(
@@ -297,8 +297,8 @@ function frcf_courses_add_page() {
             </table>
 
             <p class="submit">
-                <input type="submit" class="button-primary" value="<?php echo $course ? 'Actualizează' : 'Adaugă'; ?> Curs">
-                <a href="?page=frcf-courses" class="button">Anulează</a>
+                <input type="submit" class="button-primary" value="<?php echo $course ? esc_attr__( 'Actualizează Curs', 'frcf-courses' ) : esc_attr__( 'Adaugă Curs', 'frcf-courses' ); ?>">
+                <a href="?page=frcf-courses" class="button"><?php echo esc_html__( 'Anulează', 'frcf-courses' ); ?></a>
             </p>
         </form>
     </div>
@@ -306,10 +306,10 @@ function frcf_courses_add_page() {
     <script type="text/javascript">
     function selectImage() {
         var frame = wp.media({
-            title: 'Selectează Imagine',
+            title: '<?php echo esc_js( esc_html__( 'Selectează Imagine', 'frcf-courses' ) ); ?>',
             multiple: false,
             library: {type: 'image'},
-            button: {text: 'Folosește Imagine'}
+            button: {text: '<?php echo esc_js( esc_html__( 'Folosește Imagine', 'frcf-courses' ) ); ?>'}
         });
 
         frame.on('select', function() {
@@ -355,51 +355,51 @@ function frcf_courses_settings_page() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('frcf_save_settings')) {
         update_option('frcf_courses_columns', max(2, min(4, intval($_POST['columns']))));
         update_option('frcf_courses_per_page', max(1, min(50, intval($_POST['per_page']))));
-        echo '<div class="notice notice-success"><p>Setările au fost salvate!</p></div>';
+        echo '<div class="notice notice-success"><p>' . esc_html__( 'Setările au fost salvate!', 'frcf-courses' ) . '</p></div>';
     }
 
     $columns = get_option('frcf_courses_columns', 3);
     $per_page = get_option('frcf_courses_per_page', 12);
     ?>
     <div class="wrap">
-        <h1>Setări FRCF Cursuri</h1>
+        <h1><?php echo esc_html__( 'Setări FRCF Cursuri', 'frcf-courses' ); ?></h1>
 
         <form method="post" action="">
             <?php wp_nonce_field('frcf_save_settings'); ?>
             <table class="form-table">
                 <tr>
-                    <th><label for="columns">Număr Coloane</label></th>
+                    <th><label for="columns"><?php echo esc_html__( 'Număr Coloane', 'frcf-courses' ); ?></label></th>
                     <td>
                         <select name="columns" id="columns">
-                            <option value="2" <?php selected($columns, 2); ?>>2 Coloane</option>
-                            <option value="3" <?php selected($columns, 3); ?>>3 Coloane</option>
-                            <option value="4" <?php selected($columns, 4); ?>>4 Coloane</option>
+                            <option value="2" <?php selected($columns, 2); ?>><?php echo esc_html__( '2 Coloane', 'frcf-courses' ); ?></option>
+                            <option value="3" <?php selected($columns, 3); ?>><?php echo esc_html__( '3 Coloane', 'frcf-courses' ); ?></option>
+                            <option value="4" <?php selected($columns, 4); ?>><?php echo esc_html__( '4 Coloane', 'frcf-courses' ); ?></option>
                         </select>
-                        <p class="description">Numărul de coloane pentru afișarea cursurilor</p>
+                        <p class="description"><?php echo esc_html__( 'Numărul de coloane pentru afișarea cursurilor', 'frcf-courses' ); ?></p>
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="per_page">Cursuri pe Pagină</label></th>
+                    <th><label for="per_page"><?php echo esc_html__( 'Cursuri pe Pagină', 'frcf-courses' ); ?></label></th>
                     <td>
                         <input type="number" name="per_page" id="per_page" value="<?php echo esc_attr($per_page); ?>" min="1" max="50">
-                        <p class="description">Numărul de cursuri afișate pe pagină</p>
+                        <p class="description"><?php echo esc_html__( 'Numărul de cursuri afișate pe pagină', 'frcf-courses' ); ?></p>
                     </td>
                 </tr>
             </table>
 
             <p class="submit">
-                <input type="submit" class="button-primary" value="Salvează Setările">
+                <input type="submit" class="button-primary" value="<?php echo esc_attr__( 'Salvează Setările', 'frcf-courses' ); ?>">
             </p>
         </form>
 
-        <h2>Utilizare Shortcode</h2>
-        <p>Folosește shortcode-ul <code>[frcf_courses]</code> pentru a afișa cursurile pe orice pagină sau articol.</p>
+        <h2><?php echo esc_html__( 'Utilizare Shortcode', 'frcf-courses' ); ?></h2>
+        <p><?php echo esc_html__( 'Folosește shortcode-ul', 'frcf-courses' ); ?> <code>[frcf_courses]</code> <?php echo esc_html__( 'pentru a afișa cursurile pe orice pagină sau articol.', 'frcf-courses' ); ?></p>
         <ul>
-            <li><code>[frcf_courses columns="3"]</code> – Setează numărul de coloane</li>
-            <li><code>[frcf_courses location="București"]</code> – Afișează doar cursurile dintr-o locație</li>
-            <li><code>[frcf_courses limit="6"]</code> – Limitează numărul de cursuri</li>
-            <li><code>[frcf_courses show_all="yes"]</code> – Afișează toate cursurile (inclusiv expirate)</li>
-            <li><code>[frcf_courses debug="yes"]</code> – Afișează informații de debug</li>
+            <li><code>[frcf_courses columns="3"]</code> – <?php echo esc_html__( 'Setează numărul de coloane', 'frcf-courses' ); ?></li>
+            <li><code>[frcf_courses location="București"]</code> – <?php echo esc_html__( 'Afișează doar cursurile dintr-o locație', 'frcf-courses' ); ?></li>
+            <li><code>[frcf_courses limit="6"]</code> – <?php echo esc_html__( 'Limitează numărul de cursuri', 'frcf-courses' ); ?></li>
+            <li><code>[frcf_courses show_all="yes"]</code> – <?php echo esc_html__( 'Afișează toate cursurile (inclusiv expirate)', 'frcf-courses' ); ?></li>
+            <li><code>[frcf_courses debug="yes"]</code> – <?php echo esc_html__( 'Afișează informații de debug', 'frcf-courses' ); ?></li>
         </ul>
     </div>
     <?php
@@ -488,13 +488,13 @@ function frcf_courses_shortcode($atts) {
     if ($atts['debug'] === 'yes') {
         ?>
         <div style="background:#f0f0f0;padding:20px;margin:20px 0;border:1px solid #ccc;">
-            <h3>Debug Info</h3>
-            <p><strong>Query executat:</strong> <?php echo esc_html($query); ?></p>
-            <p><strong>Data curentă:</strong> <?php echo esc_html($today); ?></p>
-            <p><strong>Număr cursuri găsite:</strong> <?php echo count($courses); ?></p>
-            <p><strong>Total cursuri în DB:</strong> <?php echo (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_name"); ?></p>
+            <h3><?php echo esc_html__( 'Debug Info', 'frcf-courses' ); ?></h3>
+            <p><strong><?php echo esc_html__( 'Query executat:', 'frcf-courses' ); ?></strong> <?php echo esc_html($query); ?></p>
+            <p><strong><?php echo esc_html__( 'Data curentă:', 'frcf-courses' ); ?></strong> <?php echo esc_html($today); ?></p>
+            <p><strong><?php echo esc_html__( 'Număr cursuri găsite:', 'frcf-courses' ); ?></strong> <?php echo count($courses); ?></p>
+            <p><strong><?php echo esc_html__( 'Total cursuri în DB:', 'frcf-courses' ); ?></strong> <?php echo (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_name"); ?></p>
             <?php if (!empty($courses)) : ?>
-                <p><strong>Primul curs:</strong></p>
+                <p><strong><?php echo esc_html__( 'Primul curs:', 'frcf-courses' ); ?></strong></p>
                 <pre><?php echo esc_html(print_r($courses[0], true)); ?></pre>
             <?php endif; ?>
         </div>
@@ -505,9 +505,9 @@ function frcf_courses_shortcode($atts) {
 
         <?php if (is_array($locations) && count($locations) > 1): ?>
         <div class="frcf-filter-container">
-            <label for="frcf-location-filter">Filtrează după locație:</label>
+            <label for="frcf-location-filter"><?php echo esc_html__( 'Filtrează după locație:', 'frcf-courses' ); ?></label>
             <select id="frcf-location-filter" class="frcf-location-filter">
-                <option value="">Toate locațiile</option>
+                <option value=""><?php echo esc_html__( 'Toate locațiile', 'frcf-courses' ); ?></option>
                 <?php foreach ($locations as $loc): ?>
                     <option value="<?php echo esc_attr($loc); ?>"><?php echo esc_html($loc); ?></option>
                 <?php endforeach; ?>
@@ -563,13 +563,13 @@ function frcf_courses_shortcode($atts) {
                         <?php endif; ?>
 
                         <div class="frcf-course-action">
-                            <a href="#" class="frcf-btn-register">Înscrie-te acum!</a>
+                            <a href="#" class="frcf-btn-register"><?php echo esc_html__( 'Înscrie-te acum!', 'frcf-courses' ); ?></a>
                         </div>
                     </div>
                 </div>
             <?php endforeach; else: ?>
                 <div class="frcf-no-courses">
-                    <p>Nu există cursuri disponibile în acest moment.</p>
+                    <p><?php echo esc_html__( 'Nu există cursuri disponibile în acest moment.', 'frcf-courses' ); ?></p>
                 </div>
             <?php endif; ?>
         </div>
