@@ -1,6 +1,6 @@
 # FRCF Course Manager
 
-Modul WordPress pentru gestionarea și afișarea cursurilor FRCF. Permite adăugarea manuală a cursurilor în panoul de administrare, filtrarea după locație și ascunderea automată a evenimentelor expirate.
+Modul WordPress pentru gestionarea și afișarea cursurilor FRCF. Permite adăugarea manuală a cursurilor în panoul de administrare, gestionarea organizatorilor, locațiilor și categoriilor (categoriile nu sunt afișate public), filtrarea după locație și ascunderea automată a evenimentelor expirate.
 
 ## Instalare
 
@@ -14,6 +14,7 @@ Modul WordPress pentru gestionarea și afișarea cursurilor FRCF. Permite adăug
 
 - adăuga, edita sau șterge cursuri;
 - ajusta numărul de coloane și cursuri pe pagină din **FRCF Cursuri → Setări**.
+- gestiona organizatorii, locațiile și categoriile cursurilor.
 
 ## Shortcode
 

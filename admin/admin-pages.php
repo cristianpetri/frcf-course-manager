@@ -40,6 +40,33 @@ function frcf_courses_admin_menu() {
         'frcf-courses-settings',
         'frcf_courses_settings_page'
     );
+
+    add_submenu_page(
+        'frcf-courses',
+        __('Organizatori', 'frcf-courses'),
+        __('Organizatori', 'frcf-courses'),
+        'manage_options',
+        'frcf-courses-organizers',
+        'frcf_courses_organizers_page'
+    );
+
+    add_submenu_page(
+        'frcf-courses',
+        __('Locații', 'frcf-courses'),
+        __('Locații', 'frcf-courses'),
+        'manage_options',
+        'frcf-courses-locations',
+        'frcf_courses_locations_page'
+    );
+
+    add_submenu_page(
+        'frcf-courses',
+        __('Categorii', 'frcf-courses'),
+        __('Categorii', 'frcf-courses'),
+        'manage_options',
+        'frcf-courses-categories',
+        'frcf_courses_categories_page'
+    );
 }
 
 // Pentru media frame în admin (selectare imagine)
@@ -79,6 +106,7 @@ function frcf_courses_admin_page() {
                     <th><?php echo esc_html__( 'Data Start', 'frcf-courses' ); ?></th>
                     <th><?php echo esc_html__( 'Data Sfârșit', 'frcf-courses' ); ?></th>
                     <th><?php echo esc_html__( 'Organizator', 'frcf-courses' ); ?></th>
+                    <th><?php echo esc_html__( 'Categorie', 'frcf-courses' ); ?></th>
                     <th><?php echo esc_html__( 'Acțiuni', 'frcf-courses' ); ?></th>
                 </tr>
             </thead>
@@ -91,6 +119,7 @@ function frcf_courses_admin_page() {
                     <td><?php echo esc_html(date('d.m.Y', strtotime($course->start_date))); ?></td>
                     <td><?php echo $course->end_date ? esc_html(date('d.m.Y', strtotime($course->end_date))) : '-'; ?></td>
                     <td><?php echo esc_html($course->organizer); ?></td>
+                    <td><?php echo esc_html($course->category); ?></td>
                     <td>
                         <a href="<?php echo esc_url( add_query_arg(array('page'=>'frcf-courses-add','id'=>$course->id), admin_url('admin.php')) ); ?>" class="button"><?php echo esc_html__( 'Editează', 'frcf-courses' ); ?></a>
                         <?php $nonce = wp_create_nonce('frcf_delete_course_' . $course->id); ?>
@@ -99,7 +128,7 @@ function frcf_courses_admin_page() {
                     </td>
                 </tr>
                 <?php endforeach; else: ?>
-                <tr><td colspan="7"><?php echo esc_html__( 'Nu există cursuri.', 'frcf-courses' ); ?></td></tr>
+                <tr><td colspan="8"><?php echo esc_html__( 'Nu există cursuri.', 'frcf-courses' ); ?></td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -117,9 +146,26 @@ function frcf_courses_add_page() {
         $course = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", intval($_GET['id'])));
     }
 
-    // Liste existente
-    $existing_locations = $wpdb->get_col("SELECT DISTINCT location FROM $table_name WHERE location != '' ORDER BY location ASC");
-    $existing_organizers = $wpdb->get_col("SELECT DISTINCT organizer FROM $table_name WHERE organizer != '' ORDER BY organizer ASC");
+    // Liste existente din opțiuni
+    $existing_locations  = get_option('frcf_courses_locations', array());
+    $existing_organizers = get_option('frcf_courses_organizers', array());
+    $existing_categories = get_option('frcf_courses_categories', array());
+
+    if ($course) {
+        if ($course->location && !in_array($course->location, $existing_locations, true)) {
+            $existing_locations[] = $course->location;
+        }
+        if ($course->organizer && !in_array($course->organizer, $existing_organizers, true)) {
+            $existing_organizers[] = $course->organizer;
+        }
+        if ($course->category && !in_array($course->category, $existing_categories, true)) {
+            $existing_categories[] = $course->category;
+        }
+    }
+
+    sort($existing_locations);
+    sort($existing_organizers);
+    sort($existing_categories);
 
     // Procesare formular
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('frcf_save_course')) {
@@ -130,6 +176,10 @@ function frcf_courses_add_page() {
         $organizer_value = (isset($_POST['organizer_select']) && $_POST['organizer_select'] === 'new')
             ? sanitize_text_field( wp_unslash( $_POST['organizer_new'] ) )
             : sanitize_text_field( wp_unslash( $_POST['organizer_select'] ) );
+
+        $category_value  = (isset($_POST['category_select']) && $_POST['category_select'] === 'new')
+            ? sanitize_text_field( wp_unslash( $_POST['category_new'] ) )
+            : sanitize_text_field( wp_unslash( $_POST['category_select'] ) );
 
         $start_date = sanitize_text_field( wp_unslash( $_POST['start_date'] ) );
         $end_date_raw = sanitize_text_field( wp_unslash( $_POST['end_date'] ) );
@@ -142,6 +192,7 @@ function frcf_courses_add_page() {
             'start_date'  => $start_date,
             'end_date'    => $end_date,
             'organizer'   => $organizer_value,
+            'category'    => $category_value,
             'description' => wp_kses_post( wp_unslash( $_POST['description'] ) )
         );
 
@@ -154,9 +205,22 @@ function frcf_courses_add_page() {
             echo '<div class="notice notice-success"><p>' . esc_html__( 'Cursul a fost adăugat!', 'frcf-courses' ) . '</p></div>';
         }
 
-        // Reîncarcă listele
-        $existing_locations = $wpdb->get_col("SELECT DISTINCT location FROM $table_name WHERE location != '' ORDER BY location ASC");
-        $existing_organizers = $wpdb->get_col("SELECT DISTINCT organizer FROM $table_name WHERE organizer != '' ORDER BY organizer ASC");
+        // Actualizează opțiunile
+        if ($location_value && !in_array($location_value, $existing_locations, true)) {
+            $existing_locations[] = $location_value;
+            sort($existing_locations);
+            update_option('frcf_courses_locations', $existing_locations);
+        }
+        if ($organizer_value && !in_array($organizer_value, $existing_organizers, true)) {
+            $existing_organizers[] = $organizer_value;
+            sort($existing_organizers);
+            update_option('frcf_courses_organizers', $existing_organizers);
+        }
+        if ($category_value && !in_array($category_value, $existing_categories, true)) {
+            $existing_categories[] = $category_value;
+            sort($existing_categories);
+            update_option('frcf_courses_categories', $existing_categories);
+        }
     }
     ?>
     <div class="wrap">
@@ -228,6 +292,22 @@ function frcf_courses_add_page() {
                     </td>
                 </tr>
                 <tr>
+                    <th><label for="category_select"><?php echo esc_html__( 'Categorie', 'frcf-courses' ); ?></label></th>
+                    <td>
+                        <select name="category_select" id="category_select" onchange="toggleCategoryInput()" style="min-width: 250px;">
+                            <option value=""><?php echo esc_html__( '-- Selectează Categorie --', 'frcf-courses' ); ?></option>
+                            <?php foreach ($existing_categories as $cat): ?>
+                                <option value="<?php echo esc_attr($cat); ?>" <?php selected($course && $course->category === $cat); ?>>
+                                    <?php echo esc_html($cat); ?>
+                                </option>
+                            <?php endforeach; ?>
+                            <option value="new"><?php echo esc_html__( '➕ Adaugă categorie nouă', 'frcf-courses' ); ?></option>
+                        </select>
+                        <input type="text" name="category_new" id="category_new" class="regular-text"
+                               placeholder="<?php echo esc_attr__( 'Introdu categorie nouă', 'frcf-courses' ); ?>" style="display: none; margin-left: 10px;">
+                    </td>
+                </tr>
+                <tr>
                     <th><label for="description"><?php echo esc_html__( 'Descriere', 'frcf-courses' ); ?></label></th>
                     <td>
                         <?php
@@ -282,6 +362,18 @@ function frcf_courses_add_page() {
     function toggleOrganizerInput() {
         var select = document.getElementById('organizer_select');
         var input = document.getElementById('organizer_new');
+
+        if (select.value === 'new') {
+            input.style.display = 'inline-block';
+        } else {
+            input.style.display = 'none';
+            input.value = '';
+        }
+    }
+
+    function toggleCategoryInput() {
+        var select = document.getElementById('category_select');
+        var input = document.getElementById('category_new');
 
         if (select.value === 'new') {
             input.style.display = 'inline-block';
@@ -348,4 +440,79 @@ function frcf_courses_settings_page() {
         </ul>
     </div>
     <?php
+}
+
+// Generic page for managing simple lists (organizers, locations, categories)
+function frcf_courses_manage_list_page($option_name, $page_title, $label) {
+    if (!current_user_can('manage_options')) { return; }
+
+    $items = get_option($option_name, array());
+
+    if (isset($_GET['delete'], $_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'frcf_delete_item_' . $_GET['delete'])) {
+        $delete = sanitize_text_field(wp_unslash($_GET['delete']));
+        $key = array_search($delete, $items, true);
+        if ($key !== false) {
+            unset($items[$key]);
+            $items = array_values($items);
+            update_option($option_name, $items);
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Element șters!', 'frcf-courses' ) . '</p></div>';
+        }
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('frcf_add_item')) {
+        $new_item = sanitize_text_field( wp_unslash( $_POST['new_item'] ) );
+        if ($new_item !== '' && !in_array($new_item, $items, true)) {
+            $items[] = $new_item;
+            sort($items);
+            update_option($option_name, $items);
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Element adăugat!', 'frcf-courses' ) . '</p></div>';
+        }
+    }
+
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html($page_title); ?></h1>
+        <form method="post" style="margin-top:20px;">
+            <?php wp_nonce_field('frcf_add_item'); ?>
+            <input type="text" name="new_item" class="regular-text" required>
+            <button type="submit" class="button button-primary"><?php echo esc_html__( 'Adaugă', 'frcf-courses' ); ?></button>
+        </form>
+
+        <?php if ($items): ?>
+            <table class="wp-list-table widefat fixed striped" style="max-width:400px;margin-top:20px;">
+                <thead>
+                    <tr>
+                        <th><?php echo esc_html(ucfirst($label)); ?></th>
+                        <th><?php echo esc_html__( 'Acțiuni', 'frcf-courses' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($items as $it): ?>
+                    <tr>
+                        <td><?php echo esc_html($it); ?></td>
+                        <td>
+                            <?php $nonce = wp_create_nonce('frcf_delete_item_' . $it); ?>
+                            <a href="<?php echo esc_url( add_query_arg(array('delete'=>$it, '_wpnonce'=>$nonce)) ); ?>" class="button" onclick="return confirm('<?php echo esc_js( esc_html__( 'Sigur dorești să ștergi?', 'frcf-courses' ) ); ?>');"><?php echo esc_html__( 'Șterge', 'frcf-courses' ); ?></a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p><?php echo esc_html__( 'Nu există elemente.', 'frcf-courses' ); ?></p>
+        <?php endif; ?>
+    </div>
+    <?php
+}
+
+function frcf_courses_locations_page() {
+    frcf_courses_manage_list_page('frcf_courses_locations', __('Gestionare Locații', 'frcf-courses'), __('locație', 'frcf-courses'));
+}
+
+function frcf_courses_organizers_page() {
+    frcf_courses_manage_list_page('frcf_courses_organizers', __('Gestionare Organizatori', 'frcf-courses'), __('organizator', 'frcf-courses'));
+}
+
+function frcf_courses_categories_page() {
+    frcf_courses_manage_list_page('frcf_courses_categories', __('Gestionare Categorii', 'frcf-courses'), __('categorie', 'frcf-courses'));
 }
