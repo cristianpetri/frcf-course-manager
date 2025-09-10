@@ -50,6 +50,11 @@ class Frcf_Courses_Shortcode {
             $prepare_values[]   = $args['location'];
         }
 
+        if ( ! empty( $args['category'] ) ) {
+            $where_conditions[] = 'category = %s';
+            $prepare_values[]   = $args['category'];
+        }
+
         if ( ! $args['show_all'] ) {
             // Include courses that start in the future or are still in progress.
 
@@ -83,6 +88,8 @@ class Frcf_Courses_Shortcode {
             array(
                 'columns'  => get_option( 'frcf_courses_columns', 3 ),
                 'location' => '',
+                'category' => '',
+                'categorie' => '',
                 'limit'    => get_option( 'frcf_courses_per_page', 12 ),
                 'show_all' => 'no',
                 'debug'    => 'no',
@@ -94,6 +101,7 @@ class Frcf_Courses_Shortcode {
         $args = array(
             'columns'  => max( 2, min( 4, (int) $atts['columns'] ) ),
             'location' => sanitize_text_field( $atts['location'] ),
+            'category' => sanitize_text_field( $atts['category'] ? $atts['category'] : $atts['categorie'] ),
             'limit'    => max( 1, (int) $atts['limit'] ),
             'show_all' => in_array( strtolower( $atts['show_all'] ), array( '1', 'true', 'yes' ), true ),
             'debug'    => in_array( strtolower( $atts['debug'] ), array( '1', 'true', 'yes' ), true ),
