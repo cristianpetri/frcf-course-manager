@@ -179,25 +179,25 @@ function frcf_courses_add_page() {
     // Procesare formular
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('frcf_save_course')) {
         $location_value  = (isset($_POST['location_select']) && $_POST['location_select'] === 'new')
-            ? sanitize_text_field($_POST['location_new'])
-            : sanitize_text_field($_POST['location_select']);
+            ? sanitize_text_field( wp_unslash( $_POST['location_new'] ) )
+            : sanitize_text_field( wp_unslash( $_POST['location_select'] ) );
 
         $organizer_value = (isset($_POST['organizer_select']) && $_POST['organizer_select'] === 'new')
-            ? sanitize_text_field($_POST['organizer_new'])
-            : sanitize_text_field($_POST['organizer_select']);
+            ? sanitize_text_field( wp_unslash( $_POST['organizer_new'] ) )
+            : sanitize_text_field( wp_unslash( $_POST['organizer_select'] ) );
 
-        $start_date = sanitize_text_field($_POST['start_date']);
-        $end_date_raw = sanitize_text_field($_POST['end_date']);
+        $start_date = sanitize_text_field( wp_unslash( $_POST['start_date'] ) );
+        $end_date_raw = sanitize_text_field( wp_unslash( $_POST['end_date'] ) );
         $end_date = !empty($end_date_raw) ? $end_date_raw : null;
 
         $data = array(
-            'title'       => sanitize_text_field($_POST['title']),
-            'image_url'   => esc_url_raw($_POST['image_url']),
+            'title'       => sanitize_text_field( wp_unslash( $_POST['title'] ) ),
+            'image_url'   => esc_url_raw( wp_unslash( $_POST['image_url'] ) ),
             'location'    => $location_value,
             'start_date'  => $start_date,
             'end_date'    => $end_date,
             'organizer'   => $organizer_value,
-            'description' => wp_kses_post($_POST['description'])
+            'description' => wp_kses_post( wp_unslash( $_POST['description'] ) )
         );
 
         if ($course) {
