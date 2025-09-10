@@ -54,14 +54,14 @@ function frcf_courses_shortcode($atts) {
             );
         }
     } else {
-        // Active = nu sunt în trecut complet (dacă există end_date, trebuie >= azi; dacă nu există end_date, start_date >= azi)
+        // Active = cursuri cu start_date în viitor sau încă în desfășurare
         if (!empty($location)) {
             $query = $wpdb->prepare(
                 "SELECT * FROM $table_name
                  WHERE location = %s
                    AND (
-                        (end_date IS NOT NULL AND end_date <> '' AND end_date <> '0000-00-00' AND end_date >= %s)
-                     OR ( (end_date IS NULL OR end_date = '' OR end_date = '0000-00-00') AND start_date >= %s )
+                        start_date >= %s
+                     OR (end_date IS NOT NULL AND end_date <> '' AND end_date <> '0000-00-00' AND end_date >= %s)
                    )
                  ORDER BY start_date ASC
                  LIMIT %d",
@@ -75,8 +75,8 @@ function frcf_courses_shortcode($atts) {
                 "SELECT * FROM $table_name
                  WHERE
                    (
-                        (end_date IS NOT NULL AND end_date <> '' AND end_date <> '0000-00-00' AND end_date >= %s)
-                     OR ( (end_date IS NULL OR end_date = '' OR end_date = '0000-00-00') AND start_date >= %s )
+                        start_date >= %s
+                     OR (end_date IS NOT NULL AND end_date <> '' AND end_date <> '0000-00-00' AND end_date >= %s)
                    )
                  ORDER BY start_date ASC
                  LIMIT %d",
