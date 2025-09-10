@@ -52,7 +52,9 @@ class Frcf_Courses_Shortcode {
 
         if ( ! $args['show_all'] ) {
             // Include courses that start in the future or are still in progress.
+
             $where_conditions[] = 'GREATEST(start_date, IFNULL(NULLIF(end_date, "0000-00-00"), start_date)) >= %s';
+
             $prepare_values[]   = $today;
         }
 
