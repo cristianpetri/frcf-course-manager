@@ -27,7 +27,7 @@ function frcf_courses_shortcode($atts) {
         'debug'    => 'no'
     ), $atts, 'frcf_courses');
 
-    $today = date('Y-m-d');
+    $today = current_time('Y-m-d');
 
     // Construim query
     if ($atts['show_all'] === 'yes') {
