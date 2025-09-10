@@ -62,8 +62,7 @@ class Frcf_Courses_Shortcode {
             $sql .= ' WHERE ' . implode( ' AND ', $where_conditions );
         }
 
-        $order = $args['show_all'] ? 'DESC' : 'ASC';
-        $sql  .= " ORDER BY start_date $order";
+        $sql .= ' ORDER BY start_date ASC';
 
         $sql            .= ' LIMIT %d';
         $prepare_values[] = $args['limit'];

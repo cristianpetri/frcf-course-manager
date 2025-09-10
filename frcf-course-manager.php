@@ -33,12 +33,14 @@ function frcf_courses_activate() {
         start_date date NOT NULL,
         end_date date,
         organizer varchar(255),
+        category varchar(255),
         description longtext,
         created_at datetime DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY  (id),
         KEY start_date (start_date),
         KEY end_date (end_date),
-        KEY location (location)
+        KEY location (location),
+        KEY category (category)
     ) $charset_collate;";
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -52,6 +54,17 @@ function frcf_courses_activate() {
 register_deactivation_hook(__FILE__, 'frcf_courses_deactivate');
 function frcf_courses_deactivate() {
     flush_rewrite_rules();
+}
+
+// Ensure database schema is up to date
+add_action('plugins_loaded', 'frcf_courses_maybe_upgrade');
+function frcf_courses_maybe_upgrade() {
+    global $wpdb;
+    $table = FRCF_COURSES_TABLE;
+    $column = $wpdb->get_results( $wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s", 'category') );
+    if ( empty( $column ) ) {
+        $wpdb->query("ALTER TABLE $table ADD category varchar(255) AFTER organizer, ADD KEY category (category)");
+    }
 }
 
 
