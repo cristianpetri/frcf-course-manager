@@ -19,33 +19,43 @@ function frcf_courses_shortcode($atts) {
     global $wpdb;
     $table_name = FRCF_COURSES_TABLE;
 
-    $atts = shortcode_atts(array(
-        'columns'  => get_option('frcf_courses_columns', 3),
-        'location' => '',
-        'limit'    => get_option('frcf_courses_per_page', 12),
-        'show_all' => 'no',
-        'debug'    => 'no'
-    ), $atts, 'frcf_courses');
+    $atts = shortcode_atts(
+        array(
+            'columns'  => get_option('frcf_courses_columns', 3),
+            'location' => '',
+            'limit'    => get_option('frcf_courses_per_page', 12),
+            'show_all' => 'no',
+            'debug'    => 'no',
+        ),
+        $atts,
+        'frcf_courses'
+    );
+
+    $columns  = max(2, min(4, intval($atts['columns'])));
+    $location = sanitize_text_field($atts['location']);
+    $limit    = max(1, intval($atts['limit']));
+    $show_all = strtolower($atts['show_all']) === 'yes';
+    $debug    = strtolower($atts['debug']) === 'yes';
 
     $today = current_time('Y-m-d');
 
     // Construim query
-    if ($atts['show_all'] === 'yes') {
-        if (!empty($atts['location'])) {
+    if ($show_all) {
+        if (!empty($location)) {
             $query = $wpdb->prepare(
                 "SELECT * FROM $table_name WHERE location = %s ORDER BY start_date DESC LIMIT %d",
-                $atts['location'],
-                intval($atts['limit'])
+                $location,
+                $limit
             );
         } else {
             $query = $wpdb->prepare(
                 "SELECT * FROM $table_name ORDER BY start_date DESC LIMIT %d",
-                intval($atts['limit'])
+                $limit
             );
         }
     } else {
         // Active = nu sunt în trecut complet (dacă există end_date, trebuie >= azi; dacă nu există end_date, start_date >= azi)
-        if (!empty($atts['location'])) {
+        if (!empty($location)) {
             $query = $wpdb->prepare(
                 "SELECT * FROM $table_name
                  WHERE location = %s
@@ -55,7 +65,10 @@ function frcf_courses_shortcode($atts) {
                    )
                  ORDER BY start_date ASC
                  LIMIT %d",
-                $atts['location'], $today, $today, intval($atts['limit'])
+                $location,
+                $today,
+                $today,
+                $limit
             );
         } else {
             $query = $wpdb->prepare(
@@ -67,18 +80,20 @@ function frcf_courses_shortcode($atts) {
                    )
                  ORDER BY start_date ASC
                  LIMIT %d",
-                $today, $today, intval($atts['limit'])
+                $today,
+                $today,
+                $limit
             );
         }
     }
 
-    $courses = $wpdb->get_results($query);
+    $courses   = $wpdb->get_results($query);
     $locations = $wpdb->get_col("SELECT DISTINCT location FROM $table_name WHERE location <> '' ORDER BY location ASC");
 
     ob_start();
 
     // Debug (în buffer, nu cu echo direct înainte de ob_start)
-    if ($atts['debug'] === 'yes') {
+    if ($debug) {
         ?>
         <div style="background:#f0f0f0;padding:20px;margin:20px 0;border:1px solid #ccc;">
             <h3><?php echo esc_html__( 'Debug Info', 'frcf-courses' ); ?></h3>
@@ -94,7 +109,7 @@ function frcf_courses_shortcode($atts) {
         <?php
     }
     ?>
-    <div class="frcf-courses-container" data-columns="<?php echo esc_attr($atts['columns']); ?>">
+    <div class="frcf-courses-container" data-columns="<?php echo esc_attr($columns); ?>">
 
         <?php if (is_array($locations) && count($locations) > 1): ?>
         <div class="frcf-filter-container">
@@ -108,7 +123,7 @@ function frcf_courses_shortcode($atts) {
         </div>
         <?php endif; ?>
 
-        <div class="frcf-courses-grid columns-<?php echo esc_attr($atts['columns']); ?>">
+        <div class="frcf-courses-grid columns-<?php echo esc_attr($columns); ?>">
             <?php if ($courses): foreach ($courses as $course): ?>
                 <?php
                 $date_display = date('d.m.Y', strtotime($course->start_date));
