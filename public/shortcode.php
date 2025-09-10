@@ -41,29 +41,36 @@ class Frcf_Courses_Shortcode {
         $table = FRCF_COURSES_TABLE;
         $today = current_time( 'Y-m-d' );
 
-        $where  = array();
-        $params = array();
+        $sql              = "SELECT * FROM $table";
+        $where_conditions = array();
+        $prepare_values   = array();
 
         if ( ! empty( $args['location'] ) ) {
-            $where[]  = 'location = %s';
-            $params[] = $args['location'];
+            $where_conditions[] = 'location = %s';
+            $prepare_values[]   = $args['location'];
         }
 
         if ( ! $args['show_all'] ) {
-            $where[]  = '( start_date >= %s OR ( end_date IS NOT NULL AND end_date <> "" AND end_date <> "0000-00-00" AND end_date >= %s ) )';
-            $params[] = $today;
-            $params[] = $today;
+            $where_conditions[] = '( start_date >= %s OR ( end_date IS NOT NULL AND end_date <> "" AND end_date <> "0000-00-00" AND end_date >= %s ) )';
+            $prepare_values[]   = $today;
+            $prepare_values[]   = $today;
         }
 
-        $where_sql = $where ? 'WHERE ' . implode( ' AND ', $where ) : '';
-        $order     = $args['show_all'] ? 'DESC' : 'ASC';
+        if ( ! empty( $where_conditions ) ) {
+            $sql .= ' WHERE ' . implode( ' AND ', $where_conditions );
+        }
 
-        $params[] = $args['limit'];
+        $order = $args['show_all'] ? 'DESC' : 'ASC';
+        $sql  .= " ORDER BY start_date $order";
 
-        return $wpdb->prepare(
-            "SELECT * FROM $table $where_sql ORDER BY start_date $order LIMIT %d",
-            $params
-        );
+        $sql            .= ' LIMIT %d';
+        $prepare_values[] = $args['limit'];
+
+        if ( ! empty( $prepare_values ) ) {
+            return $wpdb->prepare( $sql, $prepare_values );
+        }
+
+        return $sql;
     }
 
     public static function output( $atts ) {
