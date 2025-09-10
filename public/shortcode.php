@@ -251,7 +251,7 @@ class Frcf_Courses_Shortcode {
                                 <?php endif; ?>
 
                                 <div class="frcf-course-action">
-                                    <a href="#" class="frcf-btn-register"><?php echo esc_html__( 'Înscrie-te acum!', 'frcf-courses' ); ?></a>
+                                    <a href="https://cursuri.frcf.ro/" class="frcf-btn-register"><?php echo esc_html__( 'Înscrie-te acum!', 'frcf-courses' ); ?></a>
                                 </div>
                             </div>
                         </div>
