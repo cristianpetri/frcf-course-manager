@@ -16,11 +16,11 @@ Modul WordPress pentru gestionarea și afișarea cursurilor FRCF. Permite adăug
 - ajusta numărul de coloane și cursuri pe pagină din **FRCF Cursuri → Setări**.
 - gestiona organizatorii, locațiile și categoriile cursurilor.
 
-## Shortcode
+## Shortcodes
+
+### `[frcf_courses]`
 
 Folosește shortcode-ul `[frcf_courses]` pentru a afișa lista de cursuri.
-
-Shortcode-ul `[frcf_courses_by_category]` afișează cursurile grupate și sortate după categorie.
 
 Exemple:
 
@@ -29,7 +29,7 @@ Exemple:
 [frcf_courses columns="4"]
 [frcf_courses location="București" limit="5"]
 [frcf_courses show_all="yes"]
-[frcf_courses_by_category]
+[frcf_courses debug="yes"]
 ```
 
 Atribute disponibile:
@@ -39,6 +39,28 @@ Atribute disponibile:
 - `limit` – numărul maxim de cursuri returnate.
 - `show_all` – `yes` pentru a afișa și cursurile expirate.
 - `debug` – `yes` afișează informații de depanare.
+
+### `[frcf_courses_by_category]`
+
+Shortcode-ul `[frcf_courses_by_category]` afișează cursurile grupate și sortate după categorie.
+
+Exemple:
+
+```
+[frcf_courses_by_category]
+[frcf_courses_by_category columns="4"]
+[frcf_courses_by_category location="București" limit="5"]
+[frcf_courses_by_category show_all="yes"]
+```
+
+Atribute disponibile:
+
+- `columns` – numărul de coloane (2–4).
+- `location` – afișează doar cursurile dintr-o anumită locație.
+- `limit` – numărul maxim de cursuri returnate.
+- `show_all` – `yes` pentru a afișa și cursurile expirate.
+
+Instrucțiunile pentru aceste shortcode-uri sunt disponibile și în pagina de setări a modulului.
 
 ## Licență
 

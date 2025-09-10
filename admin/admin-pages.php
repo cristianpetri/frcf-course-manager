@@ -448,6 +448,13 @@ function frcf_courses_settings_page() {
             <li><code>[frcf_courses show_all="yes"]</code> – <?php echo esc_html__( 'Afișează toate cursurile (inclusiv expirate)', 'frcf-courses' ); ?></li>
             <li><code>[frcf_courses debug="yes"]</code> – <?php echo esc_html__( 'Afișează informații de debug', 'frcf-courses' ); ?></li>
         </ul>
+        <p><?php echo esc_html__( 'Shortcode-ul', 'frcf-courses' ); ?> <code>[frcf_courses_by_category]</code> <?php echo esc_html__( 'afișează cursurile grupate și sortate după categorie.', 'frcf-courses' ); ?></p>
+        <ul>
+            <li><code>[frcf_courses_by_category columns="3"]</code> – <?php echo esc_html__( 'Setează numărul de coloane', 'frcf-courses' ); ?></li>
+            <li><code>[frcf_courses_by_category location="București"]</code> – <?php echo esc_html__( 'Afișează doar cursurile dintr-o locație', 'frcf-courses' ); ?></li>
+            <li><code>[frcf_courses_by_category limit="6"]</code> – <?php echo esc_html__( 'Limitează numărul de cursuri', 'frcf-courses' ); ?></li>
+            <li><code>[frcf_courses_by_category show_all="yes"]</code> – <?php echo esc_html__( 'Afișează toate cursurile (inclusiv expirate)', 'frcf-courses' ); ?></li>
+        </ul>
     </div>
     <?php
 }
