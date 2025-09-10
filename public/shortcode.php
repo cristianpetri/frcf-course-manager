@@ -51,8 +51,8 @@ class Frcf_Courses_Shortcode {
         }
 
         if ( ! $args['show_all'] ) {
-            $where_conditions[] = '( start_date >= %s OR ( end_date IS NOT NULL AND end_date <> "" AND end_date <> "0000-00-00" AND end_date >= %s ) )';
-            $prepare_values[]   = $today;
+            // Include courses that start in the future or are still in progress.
+            $where_conditions[] = 'GREATEST(start_date, IFNULL(NULLIF(end_date, "0000-00-00"), start_date)) >= %s';
             $prepare_values[]   = $today;
         }
 
@@ -172,12 +172,13 @@ class Frcf_Courses_Shortcode {
                 foreach ($all_courses as $c) {
                     $start_check = $c->start_date >= $today ? '✅' : '❌';
                     $end_check = (!empty($c->end_date) && $c->end_date !== '0000-00-00' && $c->end_date >= $today) ? '✅' : '❌';
-                    $final_result = ($c->start_date >= $today || (!empty($c->end_date) && $c->end_date !== '0000-00-00' && $c->end_date >= $today)) ? '✅ MATCH' : '❌ NO MATCH';
-                    
+                    $ref_date = (!empty($c->end_date) && $c->end_date !== '0000-00-00') ? max($c->start_date, $c->end_date) : $c->start_date;
+                    $final_result = ($ref_date >= $today) ? '✅ MATCH' : '❌ NO MATCH';
+
                     echo '<li>';
                     echo '<strong>' . esc_html($c->title) . '</strong><br>';
                     echo '&nbsp;&nbsp;start_date >= today: ' . $start_check . ' (' . $c->start_date . ' >= ' . $today . ')<br>';
-                    echo '&nbsp;&nbsp;end_date >= today: ' . $end_check . ' (' . ($c->end_date ?: 'NULL') . ' >= ' . $today . ')<br>';
+                    echo '&nbsp;&nbsp;end_date >= today: ' . ($c->end_date ? $end_check . ' (' . $c->end_date . ' >= ' . $today . ')' : '—') . '<br>';
                     echo '&nbsp;&nbsp;<strong>Final: ' . $final_result . '</strong>';
                     echo '</li>';
                 }
